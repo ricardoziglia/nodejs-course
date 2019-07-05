@@ -2,25 +2,32 @@ const path = require("path");
 
 const express = require("express");
 const bodyParser = require("body-parser");
-
-const rootPath = require("./util/path");
+const expressHbs = require("express-handlebars");
 
 const app = express();
 
-app.set("view engine", "pug"); //template compiler
-app.set("views", "views"); //template folder (by default is /views folder)
+app.engine(
+    "hbs",
+    expressHbs({
+        layoutsDir: "views/layouts/",
+        defaultLayout: "main-layout",
+        extname: "hbs"
+    })
+);
+app.set("view engine", "hbs");
+app.set("views", "views");
 
 const adminData = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.static(path.join(rootPath, "public")));
+app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/admin", adminData.routes);
 app.use(shopRoutes);
 
 app.use((req, res, next) => {
-    res.status(404).render("404", { title: "Page not found" });
+    res.status(404).render("404", { pageTitle: "Page Not Found" });
 });
 
 app.listen(3000);
